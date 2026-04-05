@@ -1129,7 +1129,7 @@ void resolver::calc_missed_shots( shot_t* shot )
 
 	log->m_shots_spread++;
 
-	_( fatality, "FAGALITY" );
+	_( fatality, "FATALITY " );
 	_( missed, "miss due to spread\n" );
 	_( missed2, "miss due to server correction\n" );
 	_( missed3, "miss due to extrapolation\n" );

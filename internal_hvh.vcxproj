@@ -235,9 +235,9 @@
       <DocumentLibraryDependencies>false</DocumentLibraryDependencies>
     </Xdcmake>
     <ClCompile>
-      <DebugInformationFormat>None</DebugInformationFormat>
-      <PreprocessorDefinitions>_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;_HAS_STATIC_RTTI=0;_WIN32;NDEBUG;RELEASE;EVO_USE_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PreprocessorDefinitions>_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;_WIN32;NDEBUG;EVO_USE_DX9;NO_VIRT;DEBUG_LOG;NO_NETOFFSETS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:threadSafeInit /Oy- %(AdditionalOptions)</AdditionalOptions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -251,13 +251,13 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Wininet.lib;luajit.lib;lua51.lib;ntdll.lib;Ws2_32.lib;libMinHook-x86-v141-mtd.lib;crypt32.lib;crypto-46.lib;ssl-48.lib;tls-20.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Wininet.lib;luajit.lib;lua51.lib;ntdll.lib;Ws2_32.lib;libMinHook-x86-v141-mtd.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile>
       </ProgramDatabaseFile>
@@ -325,7 +325,7 @@
     <ClCompile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;_WIN32;NDEBUG;EVO_USE_DX9;NO_VIRT;DEBUG_LOG;NO_NETOFFSETS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <SDLCheck>false</SDLCheck>
@@ -340,7 +340,6 @@
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <LanguageStandard_C>Default</LanguageStandard_C>
-      <AdditionalOptions>/Zc:threadSafeInit %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Wininet.lib;luajit.lib;lua51.lib;ntdll.lib;Ws2_32.lib;libMinHook-x86-v141-mtd.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>

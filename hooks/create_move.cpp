@@ -362,131 +362,9 @@ void __stdcall cl_move(const float accumulated_extra_sample, const bool final_ti
 
 	const auto out_sequence = interfaces::client_state()->lastoutgoingcommand;
 
-	/*const auto recharge = tickbase::to_recharge > 0 && !interfaces::client_state()->chokedcommands;
-	if (recharge)
-	{
-		util::print_dev_console(true, Color::Lime(), "recharging %d\n", tickbase::to_recharge);
-
-		tickbase::to_recharge--;
-
-		const auto current_tick = interfaces::client_state()->lastoutgoingcommand + 1;
-
-		// alloc empty cmds
-		std::vector<CUserCmd> fake_cmds{};
-		fake_cmds.resize(1);
-
-		auto fake_cmd = &fake_cmds[0];
-		std::memcpy(fake_cmd, globals::current_cmd, sizeof(globals::current_cmd));
-
-		// disable in-game simulation for this cmd
-		fake_cmd->hasbeenpredicted = true;
-
-		// don't add cmd to prediction & simulation record
-		fake_cmd->tick_count = INT_MAX;
-
-		// shift cmds
-		auto net_chan = interfaces::client_state()->m_NetChannel;
-		if (!net_chan)
-			return;
-
-		//	auto net_channel_info = interfaces::client_state()->m_NetChannel();
-
-		auto command_number = globals::current_cmd->command_number + 1;
-		auto add_command_number = globals::current_cmd->command_number + 1;
-
-		auto new_cmd = &interfaces::input()->m_pCommands[command_number % 150];// interfaces::input()->get_user_cmd_vfunc(command_number);
-		if (new_cmd != fake_cmd)
-			memcpy(new_cmd, fake_cmd, sizeof(globals::current_cmd));
-
-		// don't add cmd to prediction & simulation record
-		new_cmd->tick_count = INT_MAX;
-
-		new_cmd->command_number = command_number;
-		new_cmd->hasbeenpredicted = true;
-
-		auto verified_cmd = &interfaces::input()->m_pVerifiedCommands[command_number % 150];// interfaces::input()->get_verified_user_cmd(command_number);
-		auto verfied_cmd_ptr = &verified_cmd->m_cmd;
-
-		if (verfied_cmd_ptr != new_cmd)
-			memcpy(verified_cmd, new_cmd, sizeof(globals::current_cmd));
-
-		//verified_cmd->m_crc = new_cmd->get_checksum();
-		verified_cmd->m_crc = reinterpret_cast<uint32_t(__thiscall*)(CUserCmd*)>(make_offset("client.dll", sig_get_checksum))(&*new_cmd);
-	
-		++interfaces::client_state()->chokedcommands;// ++HACKS->client_state->choked_commands;
-
-		fake_cmds.clear();
-				globals::current_cmd = &interfaces::input()->m_pCommands[current_tick % 150];
-
-		tickbase::on_recharge(globals::current_cmd);
-		tickbase::compute_current_limit();
-
-		//		misc::write_tick(current_tick);
-
-		return; // don't call clmove
-	}*/
-		const auto recharge = tickbase::to_recharge > 0 && !interfaces::client_state()->chokedcommands;
-	if (recharge)
-	{
-				//util::print_dev_console(true, Color::BlueAccent(), "recharging %d\n", tickbase::to_recharge);
-		printf("recharging %d ticks\n", tickbase::to_recharge);
-		//printf("recharging dt cl_move\n")
-		tickbase::to_recharge--;
-		//tickbase::null_interp = true;
-		//tickbase::charged_ticks++;
-
-		const auto current_tick = interfaces::client_state()->lastoutgoingcommand + 1;
-
-		interfaces::input()->m_pCommands[current_tick % 150] = interfaces::input()->m_pCommands[out_sequence % 150];
-		interfaces::input()->m_pCommands[current_tick % 150].tick_count = INT_MAX;
-		interfaces::input()->m_pCommands[current_tick % 150].command_number = current_tick;
-		misc::write_tick(current_tick);
-
-		globals::current_cmd = &interfaces::input()->m_pCommands[current_tick % 150];
-
-		tickbase::on_recharge(globals::current_cmd);
-		tickbase::compute_current_limit();
-
-		return; // don't call clmove
-	}
-	else
-	{
-		tickbase::to_adjust = 0;
-		tickbase::force_choke = false;
-		tickbase::force_unchoke = false;
-		original_cl_move(accumulated_extra_sample, final_tick);
-		tickbase::post_shift = false;
-
-		if (tickbase::to_shift > 0)
-		{
-			while (tickbase::to_shift > 0)
-			{
-				tickbase::force_choke = true;
-				original_cl_move(accumulated_extra_sample, final_tick);
-				--tickbase::to_shift;
-	    		//--tickbase::charged_ticks;
-			}
-
-			interfaces::prediction()->get_predicted_commands() = clamp(interfaces::client_state()->lastoutgoingcommand + 1 - interfaces::client_state()->last_command_ack,
-				0, interfaces::prediction()->get_predicted_commands());
-
-			if (out_sequence == interfaces::client_state()->lastoutgoingcommand && interfaces::client_state()->m_NetChannel)
-			{
-				interfaces::client_state()->m_NetChannel->m_nOutSequenceNr--;
-				interfaces::client_state()->m_NetChannel->m_nChokedPackets = 0;
-			}
-
-			tickbase::post_shift = true;
-		}
-	}
-
-//  tickbase::null_interp = false;
-  /*
 	const auto recharge = tickbase::to_recharge > 0 && !interfaces::client_state()->chokedcommands;
 	if (recharge)
 	{
-		util::print_dev_console(true, Color::Lime(), "recharging %d\n", tickbase::to_recharge);
-
 		tickbase::to_recharge--;
 
 		const auto current_tick = interfaces::client_state()->lastoutgoingcommand + 1;
@@ -500,54 +378,37 @@ void __stdcall cl_move(const float accumulated_extra_sample, const bool final_ti
 
 		tickbase::on_recharge(globals::current_cmd);
 		tickbase::compute_current_limit();
+
+		return; // don't call clmove
 	}
-	else
+
+	tickbase::to_adjust = 0;
+	tickbase::force_choke = false;
+	tickbase::force_unchoke = false;
+	original_cl_move(accumulated_extra_sample, final_tick);
+
+	if (tickbase::to_shift > 0)
 	{
-		tickbase::to_adjust = 0;
-		tickbase::force_choke = false;
-		tickbase::force_unchoke = false;
-		original_cl_move(accumulated_extra_sample, final_tick);
-
-		if (tickbase::to_shift > 0)
+		for (auto i = 0; i < tickbase::to_shift; i++)
 		{
-			for (auto i = 0; i < tickbase::to_shift; i++)
-			{
-				tickbase::force_choke = true;
-				original_cl_move(accumulated_extra_sample, final_tick);
-			}
-
-			tickbase::to_shift = 0;
-			tickbase::post_shift = true;
-			interfaces::prediction()->get_predicted_commands() = clamp(interfaces::client_state()->lastoutgoingcommand + 1 - interfaces::client_state()->last_command_ack, 0, interfaces::prediction()->get_predicted_commands());
+			tickbase::force_choke = true;
+			original_cl_move(accumulated_extra_sample, final_tick);
 		}
+
+		tickbase::to_shift = 0;
+		tickbase::post_shift = true;
+		interfaces::prediction()->get_predicted_commands() = clamp(interfaces::client_state()->lastoutgoingcommand + 1 - interfaces::client_state()->last_command_ack, 0, interfaces::prediction()->get_predicted_commands());
 
 		if (out_sequence == interfaces::client_state()->lastoutgoingcommand && interfaces::client_state()->m_NetChannel)
 		{
 			interfaces::client_state()->m_NetChannel->m_nOutSequenceNr--;
 			interfaces::client_state()->m_NetChannel->m_nChokedPackets = 0;
 		}
-	}*/
-
-	if (out_sequence == interfaces::client_state()->lastoutgoingcommand && interfaces::client_state()->m_NetChannel)
-	{
-		const auto choked_packets = interfaces::client_state()->m_NetChannel->m_nChokedPackets;
-		const auto out_seq_nr = interfaces::client_state()->m_NetChannel->m_nOutSequenceNr;
-
-		interfaces::client_state()->m_NetChannel->m_nChokedPackets = 0;
-		interfaces::client_state()->m_NetChannel->m_nOutSequenceNr = out_sequence;
-		interfaces::client_state()->m_NetChannel->SendDatagram();
-		interfaces::client_state()->m_NetChannel->m_nChokedPackets = choked_packets;
-		interfaces::client_state()->m_NetChannel->m_nOutSequenceNr = out_seq_nr;
 	}
-	else
-	{
+
 		tickbase::post_shift = false;
 		tickbase::compute_current_limit(interfaces::client_state()->lastoutgoingcommand);
 		globals::sent_commands.push_back(interfaces::client_state()->lastoutgoingcommand);
-	}
-
-
-		//original_cl_move(accumulated_extra_sample, final_tick);
 }
 
 __declspec( naked ) void hook::cl_move_naked()

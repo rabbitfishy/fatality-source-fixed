@@ -37,7 +37,7 @@ namespace std
 #include "threadsafe_deque.h"
 #include <shared_mutex>
 
-#ifdef NO_VIRT
+//#ifdef NO_VIRT
 #define VIRTUALIZER_TIGER_WHITE_START {}
 #define VIRTUALIZER_TIGER_WHITE_END {}
 #define VIRTUALIZER_SHARK_RED_START {}
@@ -54,9 +54,9 @@ namespace std
 #define VIRTUALIZER_DOLPHIN_WHITE_END {}
 #define VIRTUALIZER_DOLPHIN_BLACK_START  {}
 #define VIRTUALIZER_DOLPHIN_BLACK_END  {}
-#else
-#include <VirtualizerSDK.h>
-#endif
+//#else
+//#include <VirtualizerSDK.h>
+//#endif
 
 template <typename T> __forceinline int signum( T val )
 {

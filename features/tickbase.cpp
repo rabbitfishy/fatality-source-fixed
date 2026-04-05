@@ -2,7 +2,7 @@
 
 void tickbase::reset()
 {
-	force_choke = force_drop = skip_next_adjust = fast_fire = hide_shot = keep_config_changed = false;
+	force_choke = force_drop = skip_next_adjust = fast_fire = hide_shot = false;
 	clock_drift = server_limit = to_recharge = to_shift = to_adjust = 0;
 }
 
@@ -27,11 +27,7 @@ bool tickbase::holds_tick_base_weapon()
 
 void tickbase::adjust_limit_dynamic(const bool finalize)
 {
-	const auto changed = apply_static_configuration();
 	const auto ready = !to_recharge && !to_shift && !post_shift && !force_choke;
-
-	if (changed)
-		keep_config_changed = force_unchoke = true;
 
 	const auto wpn = local_weapon;
 	if (!wpn || !ready)
@@ -42,41 +38,13 @@ void tickbase::adjust_limit_dynamic(const bool finalize)
 		return;
 
 	const auto cycle_diff = wpn->get_next_primary_attack() - interfaces::globals()->curtime;
-
 	if (fast_fire && (wpn->is_shootable() || wpn->is_knife()) && (wpn_info->cycle_time < 0.55f && cycle_diff > -0.2f || cycle_diff > 0.70f) && (wpn->is_knife() || !wpn->in_reload()))
 		return;
 
-	auto dont_recharge = wpn->is_grenade() && (wpn->get_pin_pulled() || wpn->get_throw_time() != 0.f);
-
-	if (dont_recharge)
-		keep_config_changed = false;
-
-	const auto diff_wpn = wpn->get_next_primary_attack() - interfaces::globals()->curtime;
-	const float curtime = interfaces::globals()->curtime;
-	const auto diff_player = local_player->get_next_attack() - interfaces::globals()->curtime;
-
-	if (!dont_recharge && !changed && (fast_fire || hide_shot) && (wpn->is_shootable() || wpn->is_knife()) &&
-		((wpn_info->cycle_time < .55f && diff_wpn > -.2f) || diff_wpn > .7f) && (wpn->is_knife() || !wpn->in_reload()))
-		dont_recharge = true;
-
-	if (!dont_recharge && diff_player > .7f)
-		dont_recharge = true;
-
-	if (keep_config_changed)
-		dont_recharge = false;
-
-	if (dont_recharge)
-		to_recharge = 0;
+	const auto dont_recharge = wpn->is_grenade() && (wpn->get_pin_pulled() || wpn->get_throw_time() != 0.f);
 
 	const auto diff = determine_optimal_limit() - compute_current_limit();
-	const bool standing =local_player && local_player->get_velocity().Length() < 1.1f && globals::current_cmd && globals::current_cmd->forwardmove == 0.f && globals::current_cmd->sidemove == 0.f;
-
-	if (diff >= -2 && diff <= 2) {
-		if (!diff) keep_config_changed = false;
-		return;
-	}
-
-	if (diff > 0 && (vars::aim.silent->get<bool>() || aimbot::last_target == -1) && !dont_recharge && !finalize && (diff > 2 || standing))
+	if (diff > 0 && (vars::aim.silent->get<bool>() || aimbot::last_target == -1) && !dont_recharge)
 	{
 		to_recharge = diff;
 		prediction::take_shot(false);
@@ -86,10 +54,6 @@ void tickbase::adjust_limit_dynamic(const bool finalize)
 	{
 		to_shift = -diff;
 	}
-
-	if (!diff)
-		keep_config_changed = false;
-
 }
 
 void tickbase::on_recharge(const CUserCmd* cmd)
@@ -257,30 +221,27 @@ void tickbase::fill_fake_commands()
 		const auto cmd = &interfaces::input()->m_pCommands[sequence % 150];
 		*cmd = *globals::current_cmd;
 		cmd->command_number = sequence;
-		cmd->tick_count = globals::current_cmd->tick_count + 200 + i;
+		cmd->tick_count += 200 + i;
 		cmd->buttons &= ~(IN_ATTACK | IN_ATTACK2);
 		misc::write_tick(cmd->command_number);
 	}
 }
 
-//void tickbase::apply_static_configuration()
-bool tickbase::apply_static_configuration()
+
+void tickbase::apply_static_configuration()
 {
-	const auto previous = fast_fire || hide_shot;
-	//const auto wpn = local_weapon;
+	const auto wpn = local_weapon;
 	if (vars::aim.fake_duck->get<bool>())
 	{
 		fast_fire = hide_shot = false;
-		//return;
+		return;
 	}
-	else //if (wpn)
+
+	if (wpn)
 	{
 		fast_fire = vars::aim.doubletap->get<bool>();
 		hide_shot = !fast_fire && vars::aim.silent->get<bool>();
 	}
-
-	return previous != (fast_fire || hide_shot);
-
 }
 
 int tickbase::determine_optimal_shift()

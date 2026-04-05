@@ -19,8 +19,7 @@ namespace tickbase
 	void attempt_shift_back(bool& send_packet);
 	void revert_shift_back();
 	void fill_fake_commands();
-	//void apply_static_configuration();
-	bool apply_static_configuration();
+	void apply_static_configuration();
 	int determine_optimal_shift();
 	int determine_optimal_limit();
 	float get_adjusted_time();
@@ -31,5 +30,5 @@ namespace tickbase
 	void on_runcmd(const CUserCmd* cmd, int& tickbase);
 
 	inline int clock_drift = {}, server_limit = {}, to_recharge = {}, to_shift = {}, to_adjust = {}, to_correct = {};
-	inline bool force_choke = {}, force_unchoke = {}, force_drop = {}, skip_next_adjust = {}, fast_fire = {}, hide_shot = {}, post_shift = {}, keep_config_changed{};
+	inline bool force_choke = {}, force_unchoke = {}, force_drop = {}, skip_next_adjust = {}, fast_fire = {}, hide_shot = {}, post_shift = {};
 };

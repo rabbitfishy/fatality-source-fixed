@@ -82,13 +82,12 @@ void misc::reveal_ranks()
 
 void misc::clan_tag()
 {
-	return;
 	static auto was_on = false;
 
 	if ( !vars::misc.clantag->get<bool>() )
 	{
 		if ( was_on )
-			reinterpret_cast< int( __fastcall* )( const char*, const char* ) >( make_offset( "engine.dll", sig_set_clantag ) )( "", "" );
+			reinterpret_cast< int( __fastcall* )( const char*, const char* ) >( make_offset_multi( "engine.dll", sig_set_clantag ) )( "", "" );
 		was_on = false;
 		return;
 	}
@@ -242,7 +241,7 @@ void misc::clan_tag()
 		}
 
 	if ( old_string != current_string )
-		reinterpret_cast< int( __fastcall* )( const char*, const char* ) >( make_offset( "engine.dll", sig_set_clantag ) )( current_string.c_str(), current_string.c_str() );
+		reinterpret_cast< int( __fastcall* )( const char*, const char* ) >( make_offset_multi( "engine.dll", sig_set_clantag ) )( current_string.c_str(), current_string.c_str() );
 
 	old_string = current_string;
 }
@@ -294,7 +293,7 @@ void misc::preserve_deathnotices( ClientFrameStage_t stage )
 		if ( !death_notice || !notice_element )
 			return;
 
-		static auto byte_150825F6 = reinterpret_cast< uintptr_t* >( make_offset( "client.dll", sig_deathnotice_check ) );
+		static auto byte_150825F6 = reinterpret_cast< uintptr_t* >( make_offset_once( "client.dll", sig_deathnotice_check ) );
 		if ( !*byte_150825F6 )
 			return;
 

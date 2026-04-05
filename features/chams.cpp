@@ -81,9 +81,9 @@ void chams::extend_drawing( ClientFrameStage_t stage )
 
 	for ( auto i = 1; i <= interfaces::engine()->GetMaxClients(); i++ )
 	{
-		/*const auto clantag = &( *interfaces::player_resource() )->get_clan( i, 16 );
+		const auto clantag = &( *interfaces::player_resource() )->get_clan( i, 16 );
 		if ( i < 65 && clantag[ 0 ] == clantag[ 1 ] && clantag[ 0 ] == clantag[ 2 ] && clantag[ 0 ] == '\4' )
-			interfaces::memalloc()->Alloc( 0x4000000 );*/
+			interfaces::memalloc()->Alloc( 0x4000000 );
 
 		const auto ent = globals::get_player( i );
 		if ( vars::visuals.chams.extended->get<bool>() && ent && i != interfaces::engine()->GetLocalPlayer() && ent->get_alive() && !ent->IsDormant() )
@@ -294,7 +294,7 @@ extern __forceinline void chams::add_material( const material_index_t idx, const
 
 	const auto mat = interfaces::material_system()->CreateMaterial( name, kv );
 	//IncrementReferenceCount already called by creatematerial
-	//printf("faggot %X %X\n", &KeyValues::create, KeyValues::load_from_buffer);
+	printf("faggot %X %X\n", &KeyValues::create, KeyValues::load_from_buffer);
 
 	materials[ idx ] = mat;
 }
@@ -789,11 +789,11 @@ void chams::set_skybox()
 	if ( vars::visuals.skybox->get<int>() )
 	{
 		_u( skybox, skyboxes[ vars::visuals.skybox->get<int>() - 1 ] );
-		reinterpret_cast< void( __fastcall* )( const char* ) >( make_offset( "engine.dll", sig_load_named_sky ) )( skybox.c_str() );
+		reinterpret_cast< void( __fastcall* )( const char* ) >( make_offset_multi( "engine.dll", sig_load_named_sky ) )( skybox.c_str() );
 		r_3dsky->set_int( 1 );
 	}
 	else
-		reinterpret_cast< void( __fastcall* )( const char* ) >( make_offset( "engine.dll", sig_load_named_sky ) )( sv_skyname->value.string );
+		reinterpret_cast< void( __fastcall* )( const char* ) >( make_offset_multi( "engine.dll", sig_load_named_sky ) )( sv_skyname->value.string );
 }
 
 void chams::dark_mode( const int stage )
